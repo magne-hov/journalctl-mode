@@ -275,13 +275,17 @@ If BOOT is provided it is the number of the boot-log to be shown."
 		     (shell-command-to-string "journalctl --list-boots") "[\n]" t " ")) nil t))))))
     (journalctl (concat "-b '" boot-log "'"))))
 
+(defvar journalctl-list-units-format
+ "systemctl list-units --all --quiet --plain %s | awk '{print $1}' | head -n -7 | sed -ne '2,$p'"
+  "Format string for listing units, accepting a single substitution for additional options.")
+
 ;;;###autoload
 (defun journalctl-unit (&optional unit)
   "Select and show journal for UNIT."
   (interactive)
   (let ((unit (or unit (car (split-string
 				 (completing-read "unit: " (split-string
-		     (shell-command-to-string "systemctl list-units --all --quiet | awk '{print $1}' | head -n -7 | sed -ne '2,$p'| sed -e '/●/d'") "[\n]" t " ") nil t))))))
+		     (shell-command-to-string (format journalctl-list-units-format "")) "[\n]" t " ") nil t))))))
     (journalctl (concat "--unit='" unit "'"))))
 
 ;;;###autoload
@@ -290,7 +294,7 @@ If BOOT is provided it is the number of the boot-log to be shown."
   (interactive)
   (let ((unit (or unit (car (split-string
 				 (completing-read "unit: " (split-string
-		     (shell-command-to-string "systemctl list-units --all --user --quiet | awk '{print $1}' | head -n -7 | sed -ne '2,$p'| sed -e '/●/d'") "[\n]" t " ") nil t))))))
+		     (shell-command-to-string (format journalctl-list-units-format "--user")) "[\n]" t " ") nil t))))))
     (journalctl (concat "--user-unit='" unit "'"))))
 
 
